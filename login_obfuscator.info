@@ -1,0 +1,4 @@
+name = Login Obfuscator
+description = Change the login and user account paths so they are not consistent with standard Drupal paths.
+core = 7.x
+package = Other

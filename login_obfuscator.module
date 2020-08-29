@@ -1,0 +1,50 @@
+<?php
+
+
+/**
+ * Implements hook_menu().
+ */
+function login_obfuscator_menu() {
+  $items = array();
+  $items['user/mrbagnall/login'] = array(
+   'title' => t('Micahel Bagnall User Login'),
+   'page callback' => 'drupal_get_form',
+   'page arguments' => array('user_login'),
+   'access callback' => array('login_obfuscator_user_logged_in'),
+   'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_menu_alter().
+ */
+function login_obfuscator_menu_alter(&$items) {
+  unset($items['user'], $items['user/register']);
+  $items['user'] = array(
+    'page callback' => 'drupal_goto',
+    'page arguments' => array('<front>'),
+    'access callback' => 'user access',
+    'access arguments' => array('access content'),
+  );
+  $items['user/register'] = array(
+    'page callback' => 'drupal_goto',
+    'page arguments' => array('<front>'),
+    'access callback' => 'user access',
+    'access arguments' => array('access content'),
+  );
+}
+
+/**
+ * Access callback to see if we're already logged in and if we are then just go
+ * to the user's page.
+ */
+function login_obfuscator_user_logged_in() {
+  global $user;
+  if (!empty($user->uid)) {
+    drupal_goto('user/' . $user->uid);
+  }
+  else {
+    return TRUE;
+  }
+}
