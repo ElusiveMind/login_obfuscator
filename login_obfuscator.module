@@ -6,8 +6,8 @@
  */
 function login_obfuscator_menu() {
   $items = array();
-  $items['user/mrbagnall/login'] = array(
-   'title' => t('Micahel Bagnall User Login'),
+  $items['user/obfuscator/login'] = array(
+   'title' => t('Obfuscated User Login'),
    'page callback' => 'drupal_get_form',
    'page arguments' => array('user_login'),
    'access callback' => array('login_obfuscator_user_logged_in'),
