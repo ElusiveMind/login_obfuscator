@@ -1,38 +1,98 @@
 <?php
 
-
 /**
  * Implements hook_menu().
  */
 function login_obfuscator_menu() {
   $items = array();
-  $items['user/obfuscator/login'] = array(
-   'title' => t('Obfuscated User Login'),
-   'page callback' => 'drupal_get_form',
-   'page arguments' => array('user_login'),
-   'access callback' => array('login_obfuscator_user_logged_in'),
-   'type' => MENU_NORMAL_ITEM,
-  );
+  $enabled = variable_get('lo_enabled', 0);
+  $path = variable_get('lo_path', 'user/login');
+  $title = variable_get('lo_title', 'User Login');
+  if (!empty($enabled)) {
+    $items[$path] = array(
+    'title' => $title,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('user_login'),
+    'access callback' => array('login_obfuscator_user_logged_in'),
+    'type' => MENU_NORMAL_ITEM,
+    );
+  }
   return $items;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function login_obfuscator_form_system_site_information_settings_alter(&$form, &$form_state, $form_id) {
+  $form['login_obfuscator'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Login Obfuscator'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
+  $form['login_obfuscator']['lo_enabled'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enabled'),
+    '#description' => t('Enable or disable login obfuscation.'),
+    '#default_value' => variable_get('lo_enabled', 0),
+  );
+  $form['login_obfuscator']['lo_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Updated path to user login'),
+    '#description' => t('The altered path to your user login. Do not add preceeding or trailing slashes.'),
+    '#default_value' => variable_get('lo_path', 'user/login'),
+  );
+  $form['login_obfuscator']['lo_title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Login page title'),
+    '#description' => t('The title for your login page'),
+    '#default_value' => variable_get('lo_title', 'User Login'),
+  );
+  $form['login_obfuscator']['lo_disable_registration_path'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Disable site registration path'),
+    '#description' => t('You can also turn off the site registration path to prevent hits on that as well.'),
+    '#default_value' => variable_get('lo_disable_registration_path', 0),
+  );
+  $form['#submit'][] = 'login_obfuscator_form_system_site_information_settings_submit';
+}
+
+/**
+ * Submit handler for our site information form alterations.
+ */
+function login_obfuscator_form_system_site_information_settings_submit($form, $form_state) {
+  $values = $form_state['values'];
+  variable_get('lo_enabled', $values['lo_enabled']);
+  variable_get('lo_path', $values['lo_path']);
+  variable_get('lo_title', $values['lo_title']);
+  variable_get('lo_disable_registration_path', $values['lo_disable_registration_path']);
+  menu_rebuild();
 }
 
 /**
  * Implements hook_menu_alter().
  */
 function login_obfuscator_menu_alter(&$items) {
-  unset($items['user'], $items['user/register']);
-  $items['user'] = array(
-    'page callback' => 'drupal_goto',
-    'page arguments' => array('<front>'),
-    'access callback' => 'user access',
-    'access arguments' => array('access content'),
-  );
-  $items['user/register'] = array(
-    'page callback' => 'drupal_goto',
-    'page arguments' => array('<front>'),
-    'access callback' => 'user access',
-    'access arguments' => array('access content'),
-  );
+  $enabled = variable_get('lo_enabled', 0);
+  if (!empty($enabled)) {
+    unset($items['user']);
+    $items['user'] = array(
+      'page callback' => 'drupal_goto',
+      'page arguments' => array('<front>'),
+      'access callback' => 'user access',
+      'access arguments' => array('access content'),
+    );
+  }
+  $disabled = variable_get('lo_disable_registration_path', 0);
+  if (!empty($disabled)) {
+    unset($items['user/register']);
+    $items['user/register'] = array(
+      'page callback' => 'drupal_goto',
+      'page arguments' => array('<front>'),
+      'access callback' => 'user access',
+      'access arguments' => array('access content'),
+    );
+  }
 }
 
 /**

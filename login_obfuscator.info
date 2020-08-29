@@ -1,4 +1,4 @@
 name = Login Obfuscator
-description = Change the login and user account paths so they are not consistent with standard Drupal paths.
+description = Change the login and user account paths so they are not consistent with standard Drupal paths. This is designed for sites without public user logins where you wish to protect the login mechanism from bot traffic.
 core = 7.x
 package = Other
